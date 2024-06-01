@@ -1,16 +1,102 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { useDeployedContractInfo, useScaffoldContract } from "../hooks/scaffold-eth";
+import {
+  adminAccount,
+  brdigeAdminWallet,
+  erc20ABI,
+  formatBigIntToDecimalString,
+  l1Token,
+  sendTokenOnL2ToUser,
+} from "../services/bridge";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ethers = require("ethers");
+
 const Home: NextPage = () => {
+  const [quotaAmount, setQuotaAmount] = useState<number>(0);
+  const [pricePerQuota, setPricePerQuota] = useState<bigint>(0n);
   const { address: connectedAddress } = useAccount();
 
+  const { data: storageContract } = useScaffoldContract({
+    contractName: "StorageContract",
+  });
+
+  const { data: deployedContractData } = useDeployedContractInfo("StorageContract");
+
+  console.log({ deployedContractData });
+
+  storageContract?.read.pricePerQuota().then(setPricePerQuota);
+  const bridgeAmount = pricePerQuota * BigInt(quotaAmount);
+
+  const sendErc20ToAdminOnL1 = async (usdc: bigint) => {
+    await window?.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: "0xAA36A7" }],
+    });
+
+    // Create a new provider and signer from MetaMask
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+
+    // Create a new instance of the token contract
+    const tokenContract = new ethers.Contract(l1Token, erc20ABI, signer);
+
+    // Send the tokens
+    const tx = await tokenContract.transfer(adminAccount.address, usdc);
+    console.log("Transaction receipt:", tx);
+    const receipt = await tx.wait();
+    console.log("Transaction receipt:", receipt);
+  };
+
+  const handleClick = async () => {
+    if (connectedAddress) {
+      // 1. all the bridging
+      await sendErc20ToAdminOnL1(bridgeAmount);
+      await brdigeAdminWallet(bridgeAmount);
+
+      // // // 2. send to user
+      await sendTokenOnL2ToUser(bridgeAmount, connectedAddress);
+
+      // 3. call purcahsedQuota
+      console.log("starting quota purchase by switching to op again");
+
+      await window?.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0xaa37dc" }],
+      });
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+
+      if (storageContract) {
+        const storageContractInstance = new ethers.Contract(storageContract.address, storageContract.abi, signer);
+        const tx = await storageContractInstance.purchasedQuota(quotaAmount);
+        console.log("Transaction receipt:", tx);
+        const receipt = await tx.wait();
+        console.log("Transaction receipt:", receipt);
+      }
+    } else {
+      alert("no connected address");
+    }
+  };
+
+  console.log({ pricePerQuota });
   return (
     <>
+      <input type="number" onChange={e => setQuotaAmount(parseInt(e?.target?.value) || 0)} value={quotaAmount} />
+
+      {pricePerQuota}
+      {pricePerQuota && (
+        <div>You will pay: {formatBigIntToDecimalString(pricePerQuota * BigInt(quotaAmount), 1n, 6)}</div>
+      )}
+      {pricePerQuota && <div>You will pay: {((pricePerQuota * BigInt(quotaAmount)) / 1000000n).toString()}</div>}
+      <button onClick={handleClick}>purchase quota</button>
       <div className="flex items-center flex-col flex-grow pt-10">
         <div className="px-5">
           <h1 className="text-center">

@@ -22,12 +22,13 @@ const deployStorageContract: DeployFunction = async function (hre: HardhatRuntim
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
 
-  const erc20 = await hre.ethers.getContract<Contract>("SimpleERC20", deployer);
+  // const erc20 = await hre.ethers.getContract<Contract>("SimpleERC20", deployer);
+  const l2token = "0x629c2fd5d5F432357465B59D7832389A89956f0B";
 
   await deploy("StorageContract", {
     from: deployer,
     // Contract constructor arguments
-    args: [erc20.target],
+    args: [l2token],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
