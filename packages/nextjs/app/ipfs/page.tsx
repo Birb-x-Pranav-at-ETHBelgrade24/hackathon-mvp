@@ -2,8 +2,6 @@
 
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
-import PinCID from "~~/components/ipfs-go/PinCID";
-import UploadFile from "~~/components/ipfs-go/UploadFile";
 import { Address } from "~~/components/scaffold-eth";
 
 const Ipfs: NextPage = () => {
@@ -20,12 +18,8 @@ const Ipfs: NextPage = () => {
             <p className="my-2 font-medium">Connected Address:</p>
             <Address address={connectedAddress} />
           </div>
-          <div className="flex justify-center items-center space-x-2">
-            <PinCID />
-          </div>
-          <div className="flex justify-center items-center space-x-2">
-            <UploadFile />
-          </div>
+          <div className="flex justify-center items-center space-x-2">{/* <PinCID /> */}</div>
+          <div className="flex justify-center items-center space-x-2">{/* <UploadFile /> */}</div>
         </div>
       </div>
     </>

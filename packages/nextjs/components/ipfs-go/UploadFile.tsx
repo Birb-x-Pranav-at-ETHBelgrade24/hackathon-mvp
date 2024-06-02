@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useIPFS } from "~~/hooks/go-ipfs/useIPFS";
 
-const UploadFile = () => {
+const UploadFile = ({ setTx }: { setTx: any }) => {
   const { address } = useAccount();
-  const { uploadFile, loading, error, success } = useIPFS();
+  const { uploadFile, loading, error, success, tx } = useIPFS();
   const [file, setFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    setTx(tx);
+  }, [tx]);
 
   const handleUpload = async () => {
     if (file && address) {

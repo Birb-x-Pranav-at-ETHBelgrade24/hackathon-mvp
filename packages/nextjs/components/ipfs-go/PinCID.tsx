@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useIPFS } from "~~/hooks/go-ipfs/useIPFS";
 
-const PinCID = () => {
+const PinCID = ({ setTx }: { setTx: any }) => {
   const { address } = useAccount();
-  const { pinCID, loading, error, success } = useIPFS();
+  const { pinCID, loading, error, success, tx } = useIPFS();
   const [cid, setCid] = useState("");
 
   const handlePin = async () => {
@@ -12,6 +12,10 @@ const PinCID = () => {
       await pinCID(cid, address);
     }
   };
+
+  useEffect(() => {
+    tx && setTx(tx);
+  }, [tx]);
 
   return (
     <div>

@@ -5,14 +5,18 @@ export const useIPFS = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
+  const [tx, setTx] = useState<string>("");
 
   const pinCID = async (cid: string, address: string) => {
     setLoading(true);
     setError(null);
     try {
-      await axios.get(`http://localhost:3030/pincid/${cid}`, {
+      const {
+        data: { tx },
+      } = await axios.get(`http://localhost:3030/pincid/${cid}`, {
         headers: { Authorization: `Bearer ${address}` },
       });
+      setTx(tx);
       setSuccess(true);
     } catch (err) {
       setError("Error pinning CID");
@@ -36,6 +40,7 @@ export const useIPFS = () => {
         },
       });
       setSuccess(true);
+      setTx(response.data.tx);
       return response.data.cid;
     } catch (err) {
       setError("Error uploading file");
@@ -45,5 +50,5 @@ export const useIPFS = () => {
     }
   };
 
-  return { pinCID, uploadFile, loading, error, success };
+  return { pinCID, uploadFile, loading, error, success, tx };
 };
