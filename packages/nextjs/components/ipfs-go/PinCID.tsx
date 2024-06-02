@@ -16,8 +16,14 @@ const PinCID = () => {
   return (
     <div>
       <h1>Pin CID</h1>
-      <input type="text" value={cid} onChange={e => setCid(e.target.value)} placeholder="Enter CID" />
-      <button onClick={handlePin} disabled={loading}>
+      <input
+        className="input input-bordered w-full mb-2"
+        type="text"
+        value={cid}
+        onChange={e => setCid(e.target.value)}
+        placeholder="Enter CID"
+      />
+      <button onClick={handlePin} disabled={loading} className=" btn btn-primary float-right">
         Pin CID
       </button>
       {loading && <p>Loading...</p>}

@@ -18,9 +18,13 @@ const UploadFile = () => {
 
   return (
     <div>
-      <h1>Upload File</h1>
-      <input type="file" onChange={e => setFile(e.target.files ? e.target.files[0] : null)} />
-      <button onClick={handleUpload} disabled={loading || !file}>
+      <input
+        className="file-input w-full max-w-xs"
+        type="file"
+        onChange={e => setFile(e.target.files ? e.target.files[0] : null)}
+      />
+
+      <button onClick={handleUpload} disabled={loading || !file} className=" btn btn-primary float-right">
         Upload
       </button>
       {loading && <p>Loading...</p>}

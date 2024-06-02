@@ -286,7 +286,7 @@ export const sendTokenOnL2ToUser = async (usdc: bigint, user: Address) => {
 };
 
 export function formatBigIntToDecimalString(numerator: bigint, denominator: bigint, decimalPlaces: number) {
-  const result = (numerator * BigInt(2)) / denominator;
+  const result = (numerator * BigInt(1)) / denominator;
   let resultString = result.toString();
 
   // Ensure the result string has at least `decimalPlaces` + 1 length for inserting the decimal point
